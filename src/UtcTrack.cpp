@@ -1517,8 +1517,7 @@ static void updataROI(void)
 		matCopy(_tmpl, _feature_tmpl[maxIdx]);
 		matCopy(_alphaf, _feature_alphaf[maxIdx]);
 		_scale = _scaleBK;
-		//---
-		//_roi = _roiBK;
+		_roi = _roiBK;
 		_maxpeak = maxpeak;
 	}
 }
@@ -1909,8 +1908,8 @@ UTC_RECT_float UtcTrkSrch(UTCTRACK_OBJ *pUtcTrkObj, IMG_MAT frame, int *pRtnStat
 	rcResult = _trkseach(pUtcTrkObj, &frame);
 
 	if(utcStatus == 0 && lostFrame > 1){
-		updataROI();
-//		intervalFrame = gIntervalFrame;
+	    updataROI();
+		intervalFrame = gIntervalFrame;
 	}
 	
 	_offsetX = (int)(rcResult.x+rcResult.width/2.f) - pUtcTrkObj->axisX;
@@ -3188,7 +3187,7 @@ UTC_RECT_float UtcTrkProc(UTCTRACK_OBJ *pUtcTrkObj, IMG_MAT frame, int *pRtnStat
 		dbg_tmStat = dbg_getCurTimeInUsec();
 
 	UTILS_assert(frame.width == frame.step[0]);
-
+#if 0
 	if(continueCST>0 && _bKalmanFilter && _bCalSceneMV && _platType == tPLT_WRK){//close loop
 		continueCST--;
 		TRAJECTORY_PARAM	*pTrajParam = &gSceneMVHdl->m_trajParam;
@@ -3284,11 +3283,13 @@ UTC_RECT_float UtcTrkProc(UTCTRACK_OBJ *pUtcTrkObj, IMG_MAT frame, int *pRtnStat
 			_workMode = _work_mode_trk;
 			_bTrkSchLost = false;
 		}
+		printf("%s: enter.\n", __func__);
 
 		return rcResult;
 	}
+#endif
 
-	if(utcStatus==0 && lostFrame > 1/*3*/)
+	if(utcStatus==0 && lostFrame >= 0/*3*/)
 	{
 		if(intervalFrame >0){
 			if(_maxpeak > gDynamicParam.retry_acq_thred){
@@ -3319,13 +3320,13 @@ UTC_RECT_float UtcTrkProc(UTCTRACK_OBJ *pUtcTrkObj, IMG_MAT frame, int *pRtnStat
 	{
 		if(0/*_platType == tPLT_WRK /*&& _bsType == BoreSight_Sm*/)
 		{
-			plat_compensation();
+			//plat_compensation();
 		}
 		
 		rcResult = update(&frame);
 
 		if(utcStatus == 0 && lostFrame > 1/*3*/){
-			updataROI();
+			//updataROI();
 			intervalFrame = gIntervalFrame;
 			continueCount = 0;
 			_bTrackModel = SEARCH_MODEL_STATUS;
